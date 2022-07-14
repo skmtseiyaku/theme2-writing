@@ -1,27 +1,28 @@
-\documentclass [a4j,11pt] {jsarticle}
+\documentclass[a4j,11pt]{jsarticle}
+%kanji-config-updmap-sys --jis2004 haranoaji
+%latexmkrc
 
-\title  {大規模社会ネットワークからのクラスタ構造の抽出\thanks {
+\title{大規模社会ネットワークからのクラスタ構造の抽出\thanks {
   この論文は鶴見敏行さんが東京工業大学理学部情報科学科の学士論文研究を国際学会で
   発表した論文 \protect\cite {wakita-2007-finding-community-structure-in-mega-scale-social}を
   もとに情報リテラシの実習教材に作り直したものです。}}
-\author {鶴見 敏行\thanks {東京工業大学大学院情報理工学研究科 数理・計算科学専攻} \and 脇田 建{$^\dagger$}}
-\date {２００８年６月１０日}
+\author{鶴見 敏行\thanks {東京工業大学大学院情報理工学研究科 数理・計算科学専攻} \and 脇田 建{$^\dagger$}}
+\date{２００８年６月１０日}
 
-\usepackage {amsmath} % さまざまな数式を用いるための設定
-\usepackage [dvipdfmx]{graphicx,color} % 図を取り込んだり、色を利用するための設定
+\usepackage{amsmath} % さまざまな数式を用いるための設定
+\usepackage[dvipdfmx]{graphicx,color} % 図を取り込んだり、色を利用するための設定
 
-\usepackage [dvipdfmx, % 自動的にハイパーリンクを作成するための設定
+\usepackage[dvipdfmx, % 自動的にハイパーリンクを作成するための設定
              bookmarks=true,
              bookmarksnumbered=true,
-             bookmarkstype=toc] {hyperref}
-\usepackage {pxjahyper} % pLaTeXでhyperrefにおけるPDFの目次の文字化け問題を調整
+             bookmarkstype=toc]{hyperref}
+\usepackage{pxjahyper} % pLaTeXでhyperrefにおけるPDFの目次の文字化け問題を調整
 
-\usepackage {literacy} % この実習用のためだけの特殊な設定
+\usepackage{literacy} % この実習用のためだけの特殊な設定
 
-\begin {document}
+\begin{document}
 
-\maketitle \thispagestyle {myheadings}
-
+\maketitle\thispagestyle{myheadings}
 
 \begin {abstract}
 Clauset，Newman，Mooreはネットワークをボトムアップかつ貪欲に解析する手
