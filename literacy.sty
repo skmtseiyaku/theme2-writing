@@ -1,0 +1,43 @@
+
+\marginparsep=1em
+\marginparwidth=6em
+
+\usepackage {xstring}
+
+\IfStrEq*{\jobname}{model}{% 完全版（着色なり、ヘルプリンクなし）
+
+  \newcommand\helplink[2]{}
+
+  \newcommand\お手本[1]{#1}
+
+  \newenvironment{お手本ブロック}[1]{}{}
+
+}{
+  
+\IfStrEq*{\jobname}{hints}{%
+
+  \pagestyle{myheadings}
+  \markright{\textbf {実習のヒント:} \textcolor {red}{側中の\protect\includegraphics [scale=.7] {flag.pdf}の右のリンクから関連する解説ページを開けます}}
+
+  \newcommand\helplink[2]{\marginpar {\includegraphics [scale=.7] {flag.pdf}\href
+  {https://titechcomp.github.io/y21-il2j/latex/#2.html}{\small {#1}}}}
+
+  \newcommand\お手本[1]{\textcolor {red}{#1}}
+
+  \newenvironment{お手本ブロック}[1]{\textcolor {red}\bgroup}{\egroup}
+
+}{% otherwise (= not tutorial nor hints)
+
+  \newcommand\helplink[2]{}
+
+  \newcommand\空欄[1]{\textcolor {blue}{\fbox {修正箇所：この個所を適切に書き換えなさい}}}
+
+  \newcommand\空欄ブロック[1]{\smallskip\noindent
+    \fbox {\parbox {.97\linewidth} {%
+      \color {blue}
+      修正箇所：この個所を適切に書き換えなさい。\\#1 \ldots\vspace {5ex}}}\hfil
+    \medskip}
+
+}}
+
+% vim: syntax=off
