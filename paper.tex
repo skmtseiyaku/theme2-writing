@@ -2,11 +2,11 @@
 %kanji-config-updmap-sys --jis2004 haranoaji
 %latexmkrc
 
-\title{大規模社会ネットワークからのクラスタ構造の抽出\thanks {
+\title{大規模社会ネットワークからのクラスタ構造の抽出\thanks{
   この論文は鶴見敏行さんが東京工業大学理学部情報科学科の学士論文研究を国際学会で
-  発表した論文 \protect\cite {wakita-2007-finding-community-structure-in-mega-scale-social}を
+  発表した論文 \protect\cite{wakita-2007-finding-community-structure-in-mega-scale-social}を
   もとに情報リテラシの実習教材に作り直したものです。}}
-\author{鶴見 敏行\thanks {東京工業大学大学院情報理工学研究科 数理・計算科学専攻} \and 脇田 建{$^\dagger$}}
+\author{鶴見 敏行\thanks{東京工業大学大学院情報理工学研究科 数理・計算科学専攻} \and 脇田 建{$^\dagger$}}
 \date{２００８年６月１０日}
 
 \usepackage{amsmath} % さまざまな数式を用いるための設定
@@ -24,7 +24,7 @@
 
 \maketitle\thispagestyle{myheadings}
 
-\begin {abstract}
+\begin{abstract}
 Clauset，Newman，Mooreはネットワークをボトムアップかつ貪欲に解析する手
 法（CNM法）を提案し、50万ノード程度までの社会ネットワーク解析を
 可能としたが、それ以上の規模については実用的な時間内での解析は困難であっ
@@ -40,10 +40,10 @@ Clauset，Newman，Mooreはネットワークをボトムアップかつ貪欲�
 て5分、400万ノードに対しては35分程度で解析する事に成功した。また別の手
 法では、50万ノードに対して50分（CNM法より7倍早い）で解析でき、
 モジュール性の向上にも成功した。
-\end {abstract}
+\end{abstract}
 
-\section {はじめに}
-\label {sect: はじめに}
+\section{はじめに}
+\label{sect: はじめに}
 
 
 クラスタ構造の抽出は、複雑な社会ネットワークからその固有の性質を知るう
@@ -61,8 +61,14 @@ Clauset，Newman，Mooreはネットワークをボトムアップかつ貪欲�
   onsjo-2006-a-simple-message-passing-algorithm-for-graph}
 
 
-\begin {空欄ブロック}{われわれは、Clauset，Newman，Mooreによって}
-\end {空欄ブロック}
+%\begin {空欄ブロック}{われわれは、Clauset，Newman，Mooreによって}
+%\end {空欄ブロック}
+
+われわれは、Clauset，Newman，Mooreによって提案された手法（CNM法）
+\cite{clauset-2004-finding-community-structure-in-very-large}を実装し、
+Social Networking Service (SNS) より取得したネットワークのさまざまな部分集合に対しての解析を試みた。
+50 万ユーザー以下での解析は可能だった。
+しかし、さらに大きなネットワークでは実用的な時間での解析は不可能であった。
 
 そこでCNM法の合併の過程を観察した。その結果合併するクラスタサ
 イズの不均衡が計算コストに大きく影響していることが明らかとなった。この
@@ -70,55 +76,77 @@ Clauset，Newman，Mooreはネットワークをボトムアップかつ貪欲�
 ると考えた。
 
 本稿では合併するクラスタの大きさについての不均衡を抑えるために、クラス
-タサイズの比である\emph {合併比率}を定義し、合併
+タサイズの比である\emph{合併比率}を定義し、合併
 するクラスタの選定の基準として従来用いられてきた
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+\emph{モジュール性}
 に合併比率を加味するヒューリスティックを提案する。この提案を用いて実験を
 行った結果、合併の不均衡を抑えることができ、数百万ノードのネットワーク
 に対する解析も可能となった。
 
-これ以後の本稿の構成は以下の通りである。\ref
-{sect: related}節で関連研究について述べる。\ref {sect: cnm}節でCNM法
+これ以後の本稿の構成は以下の通りである。
+\ref{sect: related}節で関連研究について述べる。
+\ref{sect: cnm}節でCNM法
 を紹介し、その問題点を明らかにする。
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+\ref{sect: algorithm}節では CNM 法の欠点を改善するヒューリスティックを提
+案し、
+\ref{sect: evaluation}節では提案手法を評価する。
+最後に\ref{sect: summary}節で本稿をまとめる。
 
-\section {関連研究}
-\label {sect: related}
+\section{関連研究}
+\label{sect: related}
 
-\begin {空欄ブロック}{クラスタを抽出する手法は}
-\end {空欄ブロック}
+%\begin{空欄ブロック}{クラスタを抽出する手法は}
+%\end{空欄ブロック}
+
+\emph{クラスタ}を抽出する手法は大きく分けて二つある。
+一つは、グラフよりいくつかのノードを\emph{種}として選び、
+それを含むクラスタを返す手法
+\cite{kleinberg-1999-authoritative-sources-in-a-hyperlinked-environment,
+dean-1999-finding-related-pages-in-the-world-wide,
+miller-2001-modifications-of-kleinbergs-hits-algorithm-using,
+toyoda-2001-creating-a-web-community-chart-for-navigating-related}
+である。
+もう一つは、ネットワーク全体をクラスタに分割する手法
+ \cite{page-1999-the-pagerank-citation-ranking:-bringing-order,
+  kumar-1999-trawling-the-web-for-emerging-cyber-communities,
+  wu-2004-finding-communities-in-linear-time:-a-physics,
+  clauset-2004-finding-community-structure-in-very-large,
+  cai-2004-block-level-link-analysis,
+  onsjo-2006-a-simple-message-passing-algorithm-for-graph}
+である。
 
 前者の手法は主にウェブの解析に使われている。ウェブの解析は、各ウェブペー
 ジをノード、ハイパーリンクを\emph {エッジ}とした有向グラフとしてウェブ
 をとらえ、解析する。Kleinbergが提案した\emph {HITS} \cite{
   gibson-1998-inferring-web-communities-from-link-topology,
   kleinberg-1999-authoritative-sources-in-a-hyperlinked-environment}
-は、ウェブの適当な部
-分グラフの中からハイパーリンクで密に結合された\emph {オーソリティ}およ
-び\emph {ハブ}を抽出する手法である。オーソリティとは、多くのペー
+は、ウェブの適当な部分グラフの中からハイパーリンクで密に結合された\emph {オーソリティ}およ
+び\emph{ハブ}を抽出する手法である。オーソリティとは、多くのペー
 ジからハイパーリンクを張られている著名なページである。ハブとは、リンク
 集およびブックマークなど、多くの著名なページへハイパーリンクを張ってい
 るページである。HITSは、簡単な反復計算によって各ウェブページのオーソリ
 ティおよびハブのスコアを計算する。
 
-後者の手法としてさまざまな提案がなされている。Kumarらによる\emph
-{Trawling} \cite{kumar-1999-trawling-the-web-for-emerging-cyber-communities}
+後者の手法としてさまざまな提案がなされている。Kumarらによる\emph{Trawling}
+\cite{kumar-1999-trawling-the-web-for-emerging-cyber-communities}
 は特によく知られている。彼らは、2 億ページ以上の大規
 模なウェブのアーカイブに対してこの手法を適用し、10万個を越えるクラスタ
-の\emph {コア}を発見した。コアとはオーソリティとハブから成るサイズの小
+の\emph{コア}を発見した。コアとはオーソリティとハブから成るサイズの小
 さい
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
-であり，ほとんどのクラスタがコアを含むという
-仮定に基づいている。Clausetらにより提案された手法（CNMアルゴリ
-ズム）
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄{修正箇所：この箇所を適切に書き換えなさい}
+\emph{完全２部グラフ}
+であり，ほとんどのクラスタがコアを含むという仮定に基づいている。
+Clausetらにより提案された手法（CNMアルゴリズム）
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+\cite{cai-2004-block-level-link-analysis}は、本研究と関連が深いため、次節で説明する。
 
+\section{CNM法}
+\label{sect: cnm}
 
-\section {CNM法}
-\label {sect: cnm}
-
-\newcommand\clustering [0] {\ensuremath {{\cal C}}}
-\newcommand\DQ [3] {\ensuremath {\Delta Q^{#1}_{#2,#3}}}
+\newcommand\clustering[0]{\ensuremath{{\cal C}}}
+\newcommand\DQ[3]{\ensuremath{\Delta Q^{#1}_{#2,#3}}}
 
 NewmanとGirvanは、グラフ$G$に対するクラスタ
 リング$\clustering$が与えられたときに、そのクラスタリングの優劣を評価す
@@ -165,54 +193,78 @@ CNM法は、最大値を保持する$\DQ \clustering {c_i} {c_j}$を反復
 \label {fig: cnm algorithm}
 \end {figure}
 
-\begin {空欄ブロック}{図１に、CNM法の概要を与えた。}
-\end {空欄ブロック}
+%\begin{空欄ブロック}{図１に、CNM法の概要を与えた。}
+%\end{空欄ブロック}
+
+図\ref{fig: cnm algorithm}に、CMD法の概要を与えた。
+updateDeltaQの操作の費用が高いように思えるが、
+$\DQ \clustering{c_i}{c_j}$の再計算を要するのは
+${c_i}$または${c_j}$のいずれかが直前に合併した場合だけであり、
+その計算はその時点における値を用いて
+$\DQ \clustering {c_i}{c_j}$の値から差分的に
+計算できる。
+このため、実際は効率的に計算することができる。
+また、$\DQ \clustering {c_i} {c_j}$の最大値を与えるクラスタ対もプライオリティ・キューを利用することで簡単に見つけることができる。
 
 Clauset らは、この手法を用いて Amazon.com から得た数十万ノード
 規模のネットワークなどを解析した。
 
 われわれはClausetらの手法をJavaによって実装した。データセットとして、わ
 が国の代表的なSNSであるmixi (http://mixi.jp/)の友人間関係（マイミクシィ
-への参照）のネットワークを用いた\footnote {2005年11月に取得したmixiより
-取得した約100万ユーザーからなるネットワーク}。
-実験環境として、Intel Xeon 2.80GHz，L2 cache＝2MB，メモリ＝4GBを用い
-た。
+への参照）のネットワークを用いた\footnote{2005年11月に取得したmixiより
+取得した約100万ユーザーからなるネットワーク}。\ 
+実験環境として、Intel Xeon 2.80GHz，L2 cache ＝ 2MB，メモリ＝ 4GB を用いた。
 
 実験の結果\cite{clauset-2004-finding-community-structure-in-very-large}で示唆される高効
 率に反して予想外に解析時間がかかり、1週間で全体の10\%
 程度の解析しかすることができなかった。
 
-\begin {figure}[htbp]
-  \centerline {\includegraphics [width=0.80\linewidth]{fig2-cnm-joins-time-series.pdf}}
-  \caption {ネットワークの解析に要した時間の時系列遷移}
-  \label {fig: newman time diff}
+\begin{figure}[htbp]
+  \centerline{\includegraphics[width=0.80\linewidth]{fig2-cnm-joins-time-series.pdf}}
+  \caption{ネットワークの解析に要した時間の時系列遷移}
+  \label{fig: newman time diff}
 \end{figure}
 
 計算コストのボトルネックを調べるために、mixiネットワークの様々な部分集
 合に対して解析を試みた。mixiはそれぞれのユーザーに対して、登録した順番
 にIDナンバーを1から順番に与える。
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+$U=\{1, 2, \ldots\}$
 はユーザーIDの集合。
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+$F\subset{U\times{U}}$
 は友人関係の集合とすると、mixiネットワークは、
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+$G_{\text {mixi}} = (U,F)$
 のようなグラフで表せる。このグラフの部分集合を以下のように定義する。
 %
-\begin {align*}
-  G_{\text {mixi}}^n = (U(n), F \cap (U(n) \times U(n))) \\
-  \text {ただし } U(n) = \{ u \in U | u \le n \}
-\end {align*}
+\begin{align*}
+  G_{\text{mixi}}^n = (U(n), F \cap (U(n) \times U(n))) \\
+  \text{ただし } U(n) = \{ u \in U | u \le n \}
+\end{align*}
 
-図\ref {fig: newman time diff} はmixiネットワーク
-の様々な部分集合$G_{\text {mixi}}^N (N = \text {100K}, \text {200K},
-\text {300K}, \text {400K}, \text {500K})$に対
+図\ref{fig: newman time diff} はmixiネットワーク
+の様々な部分集合$G_{\text{mixi}}^N (N = \text{100K}, \text{200K},
+\text{300K}, \text{400K}, \text{500K})$に対
 する、クラスタ抽出が完了するまでの解析に要した時間の時系列遷移である。
 横軸は累積の合併の回数、縦軸は10,000回の合併に要する時間を秒で表してい
 る。それぞれのデータセットでは、解析の前半で合併に要する時間がかかり、
 後半で劇的に減少していることが分かる。
 
-\begin {空欄ブロック}{{}[2]はCNM法の計算量が}
-\end {空欄ブロック}
+%\begin {空欄ブロック}{{}[2]はCNM法の計算量が}
+%\end {空欄ブロック}
+
+[\ref{fig: newman time diff}]
+はCNM法の計算量が$O(md \log n)$と述べている。
+ここで$n$はノード数、$m$は全エッジ数、$d$はデンドログラムの高さである。
+また、疎な社会ネットワークにおいて、$m$を$n$、$d$を$\log n$と近似でき、
+計算量は$O(n \log_2 n)$ 
+となると予想している。
+一方、われわれの実験した実行時間の結果である図\ref{fig: newman time diff}のデータに対して
+$f(x)=ax^b $を最小二乗近似した結果、
+$a= 1.51\cdot 10^{−8}± 2.06\cdot 10^{−8}$, 
+$b=2.13±0.104$と2次のオーダーで上昇することがわかった。
+これより$d\approx \log n$の性質が少なくともmixiネットワークでは現れないことがわかった。
 
 
 われわれはデンドログラムがどのように成長するかを調べるため、合併履歴を
@@ -221,48 +273,55 @@ Clauset らは、この手法を用いて Amazon.com から得た数十万ノー
 ドログラムが作られていることが分かった。
 
 \begin{figure}[htbp]
-\begin {空欄ブロック}{図3 CNM法における}
-\end {空欄ブロック}
-  \caption {CNM法におけるクラスターの合併比率の推移（片対数）}
+  %\begin {空欄ブロック}{図3 CNM法における}
+  %\end {空欄ブロック}
+  \includegraphics [width=0.95\linewidth] {fig3-cnm-ratio-join.png}
+  \caption{CNM法におけるクラスターの合併比率の推移（片対数）}
   \label{fig: clauset ratio}
 \end{figure}
 
-図\ref {fig: clauset ratio}は$G_{\text {mixi}}^{\text {500K}}$の解析プ
-ロセスにおける各合併ごとの\emph {合併比率}を、片対数グラフにプロットし
+図\ref{fig: clauset ratio}は$G_{\text{mixi}}^{\text{500K}}$の解析プ
+ロセスにおける各合併ごとの\emph{合併比率}を、片対数グラフにプロットし
 た結果である。クラスタ$c$のサイズを$|c|$で表したときの合併比率の定義を以下に示す。
 
-\begin {空欄ブロック}{ratio(ci, cj) =}
-\end {空欄ブロック}
+%\begin {空欄ブロック}{ratio(ci, cj) =}
+%\end {空欄ブロック}
+\[\mathrm{ratio}(c_i,c_j)=\min(|c_i|/|c_j|, |c_j|/|c_i|)\]
 
+%wsl: latexmkrc \ratio not available
 
-\begin {空欄ブロック}{図3はn回目の合併を}
-\end {空欄ブロック}
+%\begin{空欄ブロック}{図3はn回目の合併を}
+%\end{空欄ブロック}
+図\ref{fig: clauset ratio}はn回目の合併操作\clustering\ := $\mathit {Join}(c_i, c_j)$を散布図上の $(n,\mathrm{ratio}(c_i,c_j))$ の位置の点として表示している。
+この図より、解析の前半で、8つの巨大なクラスタの成長を観測できた。われわれはこの偏って成長したクラスタがCNM法を mixiネットワークに適用したときの主な計算速度劣化の原因と考えた。
 
 
 不均衡な合併はデンドログラムの高さを成長させ、
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+$d\approx \log n ではなく、d\approx nとなりO(n^2\log n)$となる。
 
 
-\section {提案手法}
-\label {sect: algorithm}
+
+\section{提案手法}
+\label{sect: algorithm}
 
 前節ではCNM法の問題点を指摘した。本節ではCNM法の問
 題点を改善し、速度を劇的に向上させる3つのヒューリスティックを提案する。
 
-\begin {figure}
-\begin {tabbing}
-\hspace{.3\linewidth}\=$\mathrm {ratio}(c_i,c_j) \equiv \min(s(c_i)/s(c_j), s(c_j)/s(c_i))$; \\
-\>\textbf {while} (\textbf {true}) \{\\
+\begin{figure}
+\begin{tabbing}
+\hspace{.3\linewidth}\=$\mathrm{ratio}(c_i,c_j) \equiv \min(s(c_i)/s(c_j), s(c_j)/s(c_i))$; \\
+\>\textbf{while}(\textbf {true}) \{\\
 \>\quad\= updateDeltaQ(); \\
-\>\>$\DQ \clustering {c_i} {c_j}\mathrm {ratio}(c_i,c_j)$が最大となる\\
+\>\>$\DQ \clustering{c_i}{c_j}\mathrm{ratio}(c_i,c_j)$が最大となる\\
 \>\>\quad $(c_i, c_j) \in \clustering^2$を選択;\\
-\>\>\textbf {if} ($\max(\DQ \clustering {c_i} {c_j} < 0$) \textbf {break};\\
-\>\>\clustering\ := $\mathit {Join}(c_i, c_j)$;\\
+\>\>\textbf{if} ($\max(\DQ \clustering {c_i} {c_j} < 0$) \textbf{break};\\
+\>\>\clustering\ := $\mathit{Join}(c_i, c_j)$;\\
 \>\}
-\end {tabbing}
-  \caption {提案手法の概略}
-  \label {fig: tw algorithm}
-\end {figure}
+\end{tabbing}
+  \caption{提案手法の概略}
+  \label{fig: tw algorithm}
+\end{figure}
 
 提案する手法を図\ref {fig: tw algorithm}に掲げる。全
 体の構造はCNM法とほぼ同じである。異なるのは合併するクラスタの
@@ -284,8 +343,8 @@ Clauset らは、この手法を用いて Amazon.com から得た数十万ノー
 \end{description}
 
 
-\section {評価}
-\label {sect: evaluation}
+\section{評価}
+\label{sect: evaluation}
 
 本節では、CNM法と前節で紹介した3種類のヒューリスティッ
 ク(HE、HE'、HN)を用いた手法の評価を行う。実験環境として、Intel
@@ -294,12 +353,24 @@ Xeon 2.80GHz、メモリ4GBを用い、Linux (Red Hat Linux version 2.6.16)上�
 Server VM build 1.5.0\_06 b-05)を用いた。また、XeonはCPUを複数内蔵して
 いるが、単一スレッドのみの実装を行い、並列化は行わなかった。
 
-\begin {空欄ブロック}{4種類の手法を用い}
-\end {空欄ブロック}
+%\begin {空欄ブロック}{4種類の手法を用い}
+%\end {空欄ブロック}
+
+4種類の手法を用い$G_{\text {mixi}}^n ,(n=50K,100K,...,1,000K)$を解析・比較した。
+解析時間を表\ref{fig: cnm algorithm}、図\ref{sect: evaluation}に示す。
+CNM法が解析できた最大のデータセットは$G_{\text{mixi}}^{500K}$であり5.9 時間の解析時間を要した。
+最も解析時間が短かった手法はHNで、$G_{\text{mixi}}^{1,000K}$に対して5分以内で解析することができた。
+HEとHE’は$G_{\text{mixi}}^{1,000K}$に対してそれぞれ、
+36分と3時間の解析時間だったが、HNよりも低速であるものの、
+データのサイズを考慮すれば十分に実用的である。
+
 
 \begin{figure}[htbp]
-\begin {空欄ブロック}{図5 実行時間比較}
-\end {空欄ブロック}
+%\begin {空欄ブロック}{図5 実行時間比較}
+%\end {空欄ブロック}
+  \includegraphics[width=0.95\linewidth]{fig5-all-etime-size.pdf}
+  \caption{実行時間比較}
+  \label{fig5}
 \end{figure}
 
 \begin {table}
@@ -318,44 +389,66 @@ Server VM build 1.5.0\_06 b-05)を用いた。また、XeonはCPUを複数内蔵
 \end {table}
 
 \begin{figure}[htbp]
-\begin {空欄ブロック}{図6 スケーラビリティ}
-\end {空欄ブロック}
+%\begin {空欄ブロック}{図6 スケーラビリティ}
+%\end {空欄ブロック}
+  \includegraphics [width=0.95\linewidth] {fig6-tw-etime-size-M.pdf}
+  \caption{スケーラビリティ}
+  \label{fig6}
 \end{figure}
 
 \begin{figure}[htbp]
-\begin {空欄ブロック}{図7 HNにおけるクラスターの}
-\end {空欄ブロック}
+%\begin {空欄ブロック}{図7 HNにおけるクラスターの}
+%\end {空欄ブロック}
+  \includegraphics[width=0.95\linewidth]{fig7-hn-ratio-join-500K.png}
+  \caption{HNにおけるクラスターの合併比率の推移（片対数）}
+  \label{fig7}
 \end{figure}
 
-\begin {table}
-\begin {空欄ブロック}{表2 モジュール性の比較}
-\end {空欄ブロック}
-\end {table}
+\begin{table}
+%\begin {空欄ブロック}{表2 モジュール性の比較}
+%\end {空欄ブロック}
+\caption{モジュール性の比較}
+  \label{tbl2}
+  \begin{center}
+    \begin{tabular}{lrrrrr} \\ \hline
+          & 100K & 400K  & 700K & 1M \\ \hline
+      \textbf{CNM}& 0.496 & 0.478  & NA & NA \\
+      \textbf{HE}  & 0.413  & 0.373 & 0.355 & 0.339 \\
+      \textbf{HE'} & 0.535  & 0.529 & 0.520 & 0.514 \\
+      \textbf{HN}  & 0.412  & 0.382 & 0.358 & 0.351 \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
 
 次にモジュール性の評価だが、モジュール性の向上を最優先とするCNMアルゴリ
 ズムと比較し、われわれの手法では合併比率をも考慮したために、モジュール
 性が悪化することを予想していた。
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+しかし、表\ref{sect: related}に見るように、
 HE'ではCNM法よりも若干であるがモジュール性が上回った。
 この結果より、HE'法では$G_{\text {mixi}}^{\text {500K}}$にお
 いて、CNM法の7倍の速度性能を持ち、モジュール性においても
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+8-11\%の向上が見られ、速度面・モジュール性の両面でCNM法を上回る事ができた。
 
 
 HN法は、速度面においてHEよりも若干の性能を有すが、モジュール
 性においては
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+CNM法の21\%-28\%劣る結果となった。
 
 
-
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+図\ref{fig7}にHNの$G_{\text{mixi}}^{500K}$の
 解析プロセスにおける各合併ごとの合併比率を示す。この図からわかるよう
 に、CNM法と比べ劇的に合併比率の偏りを抑えることができた。
 
 
 われわれはさらに2006年10月に取得した約550万ユーザーからなるmixiネットワー
 クに提案するヒューリスティックを適用した。
-\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+%\空欄 {修正箇所：この箇所を適切に書き換えなさい}
+図\ref{fig6}はそのときの実行時間である。
 この図より、HEとHNはほぼ線形で実行時間が増加
 していることがわかる。一方HE'は、他の２つよりも遅いが、それでもな
 お550万ノードに対しても実用的な時間での解析が可能であった。われわれの
@@ -363,8 +456,8 @@ HN法は、速度面においてHEよりも若干の性能を有すが、モジ�
 り、HE法とHN法は物理メモリ不足のため550万ノードが実行できなかった。
 
 
-\section {まとめ}
-\label {sect: summary}
+\section{まとめ}
+\label{sect: summary}
 
 本研究では従来のClauset, Newman, Mooreが提案した手法のボトルネッ
 クが合併の不均衡にあることを明らかにした。そして、3種類のヒューリスティッ
